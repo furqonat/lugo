@@ -16,6 +16,8 @@ COPY libs/schema ./libs/schema
 RUN true
 COPY libs/prisma ./libs/prisma
 RUN true
+COPY libs/common ./libs/common
+RUN true
 COPY .eslintignore .
 RUN true
 COPY .eslintrc.json .
