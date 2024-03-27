@@ -37,14 +37,16 @@ class ControllerRunning extends GetxController {
     super.onInit();
   }
 
-  findDriverDetail(String id) async {
+  Future<DriverProfile?> findDriverDetail(String id) async {
     try {
       var token = await firebase.currentUser?.getIdToken();
       var r = await api.getDriver(driverId: id, token: token!);
       driver.value = DriverProfile.fromJson(r);
+      return DriverProfile.fromJson(r);
     } catch (e, stackTrace) {
       log('$e');
       log('$stackTrace');
+      return null;
     }
   }
 

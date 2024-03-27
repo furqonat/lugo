@@ -87,12 +87,13 @@ class ControllerProfile extends GetxController {
                               text: 'Whatsapp ',
                             ),
                             TextSpan(
-                                text: '081234567899',
-                                style: GoogleFonts.readexPro(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                              text: '081234567899',
+                              style: GoogleFonts.readexPro(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ]),
                     ),
                     const Spacer(),

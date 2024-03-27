@@ -1,17 +1,20 @@
 import 'dart:developer' as logger;
 import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart' as geo;
 import 'package:get/get.dart';
 import 'package:google_maps_utils/spherical_utils.dart';
+import 'package:location/location.dart';
 import 'package:lugo_customer/api/local_service.dart';
+import 'package:lugo_customer/page/food_menu/controller_menu.dart';
 import 'package:lugo_customer/page/food_pay/api_foodpay.dart';
 import 'package:lugo_customer/response/transaction.dart';
 import 'package:lugo_customer/route/route_name.dart';
+
 import '../../response/cart.dart';
-import 'package:location/location.dart';
 
 enum Status { idle, loading, success, failed }
 
@@ -33,6 +36,7 @@ class ControllerFoodPay extends GetxController {
 
   var orderPrice = 0.obs;
   var shppingCost = 0.obs;
+  final ctMenuFood = Get.find<ControllerFoodMenu>();
 
   final FirebaseAuth firebase = FirebaseAuth.instance;
 
@@ -53,7 +57,7 @@ class ControllerFoodPay extends GetxController {
 
   List<Map<String, dynamic>> inputList = [];
 
-  getCartMethod() async {
+  getCarts() async {
     try {
       loading(Status.loading);
       var token = await firebase.currentUser?.getIdToken();
@@ -84,15 +88,20 @@ class ControllerFoodPay extends GetxController {
     }
   }
 
-  updateCartMethod(String productId, int quantity) async {
+  handleUpdateCart(String productId, int quantity) async {
     try {
       var token = await firebase.currentUser?.getIdToken();
       if (productId.isNotEmpty) {
         var r = await api.updateCart(
-            productId: productId, quantity: quantity, token: token!);
+          productId: productId,
+          quantity: quantity,
+          token: token!,
+        );
         if (r["message"] == "OK") {
-          getCartMethod();
+          getCarts();
+          ctMenuFood.getCarts();
         } else {
+          logger.log("response : $r");
           Fluttertoast.showToast(msg: "Anda gagal merubah daftar belanja anda");
         }
       }
@@ -123,15 +132,29 @@ class ControllerFoodPay extends GetxController {
     }
   }
 
+  handleDecrease(String productId, int index) {
+    listQuantity[index]["quantity"].value == 0
+        ? listQuantity[index]["quantity"].value = 0
+        : listQuantity[index]["quantity"].value -= 1;
+    handleUpdateCart(productId, listQuantity[index]["quantity"].value);
+  }
+
+  handleIncrease(String productId, int index) {
+    listQuantity[index]["quantity"].value += 1;
+    handleUpdateCart(productId, listQuantity[index]["quantity"].value);
+  }
+
   setFee() async {
     try {
       var token = await firebase.currentUser?.getIdToken();
 
       double originalNumber = SphericalUtils.computeDistanceBetween(
-              Point(myLocation.value.latitude!, myLocation.value.longitude!),
-              Point(merchantLocation.value.latitude!,
-                  merchantLocation.value.longitude!))
-          .toDouble();
+        Point(myLocation.value.latitude!, myLocation.value.longitude!),
+        Point(
+          merchantLocation.value.latitude!,
+          merchantLocation.value.longitude!,
+        ),
+      ).toDouble();
 
       var proccess = originalNumber / 1000;
 
@@ -167,7 +190,7 @@ class ControllerFoodPay extends GetxController {
 
       var totalAmount = orderPrice.value + shppingCost.value;
 
-      var r = await api.orderFoodMart(
+      final r = await api.orderFoodMart(
           paymentType: categoryType.value,
           grossAmount: orderPrice.value,
           netAmount: orderPrice.value,
@@ -212,6 +235,9 @@ class ControllerFoodPay extends GetxController {
           });
         }
       } else {
+        Fluttertoast.showToast(msg: "Tidak bisa membuat order");
+        carts.clear();
+        Get.back();
         logger.log("failed return => $r");
       }
     } catch (e, stackTrace) {
@@ -223,7 +249,8 @@ class ControllerFoodPay extends GetxController {
   @override
   void onInit() {
     merchantAddress.value = Get.arguments['merchantAddress'];
-    getCartMethod();
+    logger.log(merchantAddress.value);
+    getCarts();
     getLocation();
     getDestinationLocation();
     setFee();

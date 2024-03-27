@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -26,7 +28,7 @@ Widget phoneVerificationView(
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         child: Text(
-          "Nomor Telepon WhatsApp Anda",
+          "Nomor Telepon Anda",
           style: GoogleFonts.readexPro(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -37,12 +39,13 @@ Widget phoneVerificationView(
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 5, 20, 0),
         child: Text(
-          "Masukan Nomor Telepon WhatsApp Anda",
+          "Masukan Nomor Telepon Anda Untuk Melanjutkan Verifikasi",
           style: GoogleFonts.readexPro(
             fontSize: 14.0,
             fontWeight: FontWeight.normal,
             color: const Color(0xFF14181B),
           ),
+          textAlign: TextAlign.center,
         ),
       ),
       Padding(
@@ -104,10 +107,15 @@ Widget phoneVerificationView(
             if (controller.formPhoneVerification.currentState!.validate()) {
               controller.handleVerificationPhone((verification) {
                 controller.verificationId.value = verification;
+                log(verification);
               }).then((value) {
                 if (!controller.loadingPhoneVerification.value) {
-                  bottomSheet(context, controller);
+                  bottomSheet(controller);
                 }
+                log(controller.verificationId.value);
+              }).catchError((error) {
+                Fluttertoast.showToast(msg: error.toString());
+                log(error.toString());
               });
             }
           },
@@ -136,9 +144,9 @@ Widget phoneVerificationView(
   );
 }
 
-void bottomSheet(BuildContext context, VerificationController controller) {
+void bottomSheet(VerificationController controller) {
   showModalBottomSheet(
-    context: context,
+    context: Get.context!,
     isDismissible: false,
     enableDrag: false,
     constraints: BoxConstraints.expand(width: Get.width, height: Get.height),

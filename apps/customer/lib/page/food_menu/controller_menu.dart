@@ -6,7 +6,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lugo_customer/response/banner.dart';
+import 'package:lugo_customer/shared/query_builder.dart';
 import 'package:lugo_customer/shared/utils.dart';
+import 'package:rest_client/cart_client.dart';
+import 'package:rest_client/product_client.dart';
 import '../../response/product.dart';
 import 'api_menu.dart';
 
@@ -14,7 +17,13 @@ enum Status { idle, loading, success, failed }
 
 class ControllerFoodMenu extends GetxController {
   final ApiFoodMenu api;
-  ControllerFoodMenu({required this.api});
+  final CartClient cartClient;
+  final ProductClient productClient;
+  ControllerFoodMenu({
+    required this.api,
+    required this.cartClient,
+    required this.productClient,
+  });
 
   var loading = Status.idle.obs;
   final firebase = FirebaseAuth.instance;
@@ -23,6 +32,7 @@ class ControllerFoodMenu extends GetxController {
   var merchantAddress = ''.obs;
 
   RxList<Product> product = <Product>[].obs;
+  final cart = Cart().obs;
   List<Map<String, dynamic>> favoriteStatus = <Map<String, dynamic>>[];
   List<Map<String, dynamic>> listQuantity = <Map<String, dynamic>>[];
 
@@ -37,49 +47,87 @@ class ControllerFoodMenu extends GetxController {
 
   var bannerLoader = false.obs;
 
-  getProductsMethod() async {
-    try {
-      loading(Status.loading);
-      product.clear();
-      var token = await firebase.currentUser?.getIdToken();
-      var r =
-          await api.getProducts(token: token!, merchantId: merchantId.value);
-      if (r["data"] != null) {
-        var list = r["data"];
-        product(RxList<Product>.from(list.map((e) => Product.fromJson(e))));
-        listQuantity = List.generate(product.length, (i) {
-          return {'quantity': 0.obs};
-        });
-        for (var i = 0; i < product.length; i++) {
-          var status = product[i]
-              .favorites!
-              .where((it) => it.customerId == firebase.currentUser?.uid)
-              .toList()
-              .isNotEmpty;
-          favoriteStatus.add({"status": status.obs});
+  getProducts() async {
+    var token = await firebase.currentUser?.getIdToken();
+    loading(Status.loading);
+    getCarts().then((value) async {
+      final queryBuilder = QueryBuilder()
+        ..addQuery("id", 'true')
+        ..addQuery("name", "true")
+        ..addQuery("description", "true")
+        ..addQuery("price", "true")
+        ..addQuery("image", "true")
+        ..addQuery("_count", "true")
+        ..addQuery("merchant_id", merchantId.value)
+        ..addQuery("favorites", "true");
+      try {
+        final resp = await productClient.getProducts(
+          bearerToken: "Bearer $token",
+          queries: queryBuilder.toMap(),
+        );
+        log("response $resp");
+        if (resp["data"] != null) {
+          final list = resp["data"];
+          product(
+            RxList<Product>.from(
+              list.map(
+                (e) => Product.fromJson(e),
+              ),
+            ),
+          );
+          listQuantity = List.generate(product.length, (i) {
+            final ff = cart.value.data?.cartItem?.firstWhereOrNull((element) {
+              return element.productId == product[i].id;
+            });
+            if (ff != null) {
+              total.value = total.value + (ff.quantity! * product[i].price!);
+              return {'quantity': ff.quantity.obs};
+            } else {
+              return {'quantity': 0.obs};
+            }
+          });
+          for (var i = 0; i < product.length; i++) {
+            var status = product[i]
+                .favorites!
+                .where((it) => it.customerId == firebase.currentUser?.uid)
+                .toList()
+                .isNotEmpty;
+            favoriteStatus.add({"status": status.obs});
+          }
+          loading(Status.success);
+        } else {
+          Fluttertoast.showToast(msg: 'Ada yang salah');
+          loading(Status.failed);
         }
-        loading(Status.success);
-      } else {
-        Fluttertoast.showToast(msg: 'Ada yang salah');
+      } catch (e, stackTrace) {
+        log('$e');
+        log('$stackTrace');
         loading(Status.failed);
       }
+    });
+  }
+
+  Future<void> getCarts() async {
+    final token = await firebase.currentUser?.getIdToken();
+    try {
+      final resp = await cartClient.getCarts("Bearer $token", {});
+      cart.value = resp;
     } catch (e, stackTrace) {
       log('$e');
       log('$stackTrace');
-      loading(Status.failed);
     }
   }
 
-  postLikeProductMethod(String idProduct, int index) async {
+  addOrDeleteProductToFavorite(String idProduct, int index) async {
+    favoriteStatus[index]['status'].value =
+        !favoriteStatus[index]['status'].value;
     try {
-      var token = await firebase.currentUser?.getIdToken();
-      var r = await api.postLikeProduct(productId: idProduct, token: token!);
-      if (r["message"] == "OK") {
-        if (favoriteStatus[index]['status'].value == true) {
-          favoriteStatus[index]['status'].value = false;
-        } else {
-          favoriteStatus[index]['status'].value = true;
-        }
+      final token = await firebase.currentUser?.getIdToken();
+      final resp = await productClient.addOrDeleteProductFromFavorite(
+        bearerToken: "Bearer $token",
+        productId: idProduct,
+      );
+      if (resp.message == "OK") {
       } else {
         Fluttertoast.showToast(msg: 'Ada yang salah');
       }
@@ -89,31 +137,10 @@ class ControllerFoodMenu extends GetxController {
     }
   }
 
-  cartMethod(String idProduct, int quantity, int price) async {
-    try {
-      var firebaseToken = await firebase.currentUser?.getIdToken();
-      if (idProduct.isNotEmpty && quantity != 0) {
-        var r = await api.cart(
-            productId: idProduct, quantity: quantity, token: firebaseToken!);
-        if (r['message'] == "OK") {
-          total.value = total.value + (price * quantity);
-        } else {
-          Fluttertoast.showToast(msg: "Product tidak dapat di tambahkan");
-        }
-      } else {
-        Fluttertoast.showToast(msg: "Anda belum memasukan jumlah pesanan anda");
-      }
-    } catch (e, stackTrace) {
-      Fluttertoast.showToast(msg: "Ada yang salah");
-      log('$e');
-      log('$stackTrace');
-    }
-  }
-
-  detailProduct(BuildContext context, String imageUrl, String productName,
-      int price, String description, bool status) {
+  detailProduct(String imageUrl, String productName, int price,
+      String description, String productId, int index) {
     return showModalBottomSheet(
-      context: context,
+      context: Get.context!,
       isScrollControlled: true,
       builder: (context) => SizedBox(
         width: Get.width,
@@ -175,19 +202,30 @@ class ControllerFoodMenu extends GetxController {
               ),
             ),
             const Spacer(),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: Card(
-                    color: status
-                        ? Colors.pink.withOpacity(0.7)
-                        : const Color(0xFF3978EF).withOpacity(0.7),
-                    child: const Icon(Icons.favorite_border_rounded,
-                        color: Colors.white),
+            InkWell(
+              onTap: () {
+                addOrDeleteProductToFavorite(productId, index);
+              },
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Card(
+                      color: const Color(0xFF3978EF).withOpacity(0.7),
+                      child: Obx(
+                        () => Icon(
+                          !favoriteStatus[index]['status'].value
+                              ? Icons.favorite_border_rounded
+                              : Icons.favorite,
+                          color: !favoriteStatus[index]['status'].value
+                              ? Colors.white
+                              : Colors.pink,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -196,6 +234,65 @@ class ControllerFoodMenu extends GetxController {
         ),
       ),
     );
+  }
+
+  void handleIncreaseCart(int index) async {
+    final token = await firebase.currentUser?.getIdToken();
+    final qty = listQuantity[index]["quantity"].value;
+    if (qty == 0) {
+      listQuantity[index]["quantity"].value += 1;
+      final currentQty = qty + 1 as int;
+      total.value = total.value + (product[index].price! * currentQty);
+      final body = {
+        "productId": "${product[index].id}",
+        "quantity": currentQty
+      };
+      final resp = await cartClient.addProductToCart("Bearer $token", body);
+      log("message => ${resp.message}");
+      return;
+    }
+
+    listQuantity[index]["quantity"].value += 1;
+    final currentQty = qty as int;
+    total.value = total.value + (product[index].price! * currentQty);
+    final resp = await updateProductFromCart(
+      "${product[index].id}",
+      currentQty,
+    );
+    log("message => ${resp.message}");
+  }
+
+  void handleDecreaseCart(int index) async {
+    if (listQuantity[index]["quantity"].value == 0) {
+      total.value = 0;
+      return;
+    }
+    if (listQuantity[index]["quantity"].value > 0) {
+      listQuantity[index]["quantity"].value -= 1;
+      final currentQty = listQuantity[index]["quantity"].value as int;
+      if (currentQty == 0) {
+        total.value = 0;
+      } else {
+        total.value -= (product[index].price! * currentQty);
+      }
+      final resp =
+          await updateProductFromCart("${product[index].id}", currentQty);
+      log("message > ${listQuantity[index]["quantity"].value} => ${resp.message}");
+      return;
+    } else {
+      total.value = 0;
+      listQuantity[index]["quantity"].value = 0;
+      final resp = await updateProductFromCart("${product[index].id}", 0);
+      log("message < 0 => ${resp.message}");
+      return;
+    }
+  }
+
+  updateProductFromCart(String productId, int quantity) async {
+    final token = await firebase.currentUser?.getIdToken();
+    final resp = await cartClient.updateProductFromCart(
+        "Bearer $token", {"productId": productId, "quantity": quantity});
+    return resp;
   }
 
   getBanner() async {
@@ -223,7 +320,7 @@ class ControllerFoodMenu extends GetxController {
   void onInit() async {
     merchantId.value = Get.arguments["merchantId"];
     merchantAddress.value = Get.arguments["merchantAddress"];
-    getProductsMethod();
+    getProducts();
     getBanner();
     super.onInit();
   }

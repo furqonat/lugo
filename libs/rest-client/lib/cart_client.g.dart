@@ -21,7 +21,7 @@ class _CartClient implements CartClient {
   String? baseUrl;
 
   @override
-  Future<Cart> customerSignIn(
+  Future<Cart> getCarts(
     String token,
     Map<String, dynamic> queries,
   ) async {
@@ -59,7 +59,7 @@ class _CartClient implements CartClient {
   @override
   Future<Response> addProductToCart(
     String token,
-    Map<String, dynamic> queries,
+    Map<String, dynamic> body,
   ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -69,7 +69,7 @@ class _CartClient implements CartClient {
     };
     _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
-    _data.addAll(queries);
+    _data.addAll(body);
     final _result =
         await _dio.fetch<Map<String, dynamic>>(_setStreamType<Response>(Options(
       method: 'POST',
@@ -95,7 +95,7 @@ class _CartClient implements CartClient {
   @override
   Future<Response> updateProductFromCart(
     String token,
-    Map<String, dynamic> queries,
+    Map<String, dynamic> body,
   ) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -105,7 +105,7 @@ class _CartClient implements CartClient {
     };
     _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
-    _data.addAll(queries);
+    _data.addAll(body);
     final _result =
         await _dio.fetch<Map<String, dynamic>>(_setStreamType<Response>(Options(
       method: 'PUT',

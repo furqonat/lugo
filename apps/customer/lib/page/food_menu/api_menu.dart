@@ -1,6 +1,12 @@
 import 'package:lugo_customer/api/api_service.dart';
+import 'package:rest_client/cart_client.dart';
+import 'package:rest_client/shared.dart';
 
 class ApiFoodMenu {
+  final CartClient cartClient;
+
+  ApiFoodMenu({required this.cartClient});
+
   Future<dynamic> getProducts(
       {required String token, required String merchantId}) async {
     var r = await ApiService().apiJSONGetWitFirebaseToken(
@@ -17,15 +23,14 @@ class ApiFoodMenu {
     return r;
   }
 
-  Future<dynamic> cart(
-      {required String productId,
-      required int quantity,
-      required String token}) async {
+  Future<Response> cart({
+    required String productId,
+    required int quantity,
+    required String token,
+  }) async {
     final body = {'productId': productId, 'quantity': quantity};
-
-    var r = await ApiService()
-        .apiJSONPostWithFirebaseToken('cart', "cart", body, token);
-    return r;
+    final resp = await cartClient.addProductToCart("Bearer $token", body);
+    return resp;
   }
 
   Future<dynamic> getBanner({required String token}) async => await ApiService()

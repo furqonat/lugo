@@ -60,7 +60,8 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                       elevation: 5,
                       color: Colors.white,
                       surfaceTintColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       child: controller.loading.value == Status.success
                           ? ListView.builder(
                               itemCount: controller.carts.length,
@@ -85,14 +86,15 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                                             imageUrl: controller.carts[index]
                                                     .product?.image ??
                                                 "",
-                                            errorWidget: (context, url,
-                                                    error) =>
-                                                const Image(
-                                                    width: 80,
-                                                    height: 80,
-                                                    fit: BoxFit.cover,
-                                                    image: AssetImage(
-                                                        'assets/images/sample_food.png')),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const Image(
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                              image: AssetImage(
+                                                  'assets/images/sample_food.png'),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -121,56 +123,82 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                                               ),
                                             ),
                                             const SizedBox(height: 5),
-                                            Obx(() => Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: <Widget>[
-                                                    InkWell(
-                                                      onTap: () => controller.updateCartMethod(
-                                                              "${controller.carts[index].productId}",
-                                                              controller.listQuantity[index]["quantity"].value),
-                                                      child: const Icon(
-                                                          CupertinoIcons.pencil,
-                                                          color: Color(
-                                                              0xFF3978EF)),
-                                                    ),
-                                                    const Spacer(),
-                                                    InkWell(
-                                                      onTap: () {
-                                                        controller.listQuantity[index]["quantity"].value == 0
-                                                            ? controller.listQuantity[index]["quantity"].value = 0
-                                                            : controller.listQuantity[index]["quantity"].value = controller.listQuantity[index]["quantity"].value - 1;
-                                                      },
-                                                      child: const Icon(
-                                                          CupertinoIcons.minus_circle_fill,
-                                                          color: Color(
-                                                              0xFF3978EF)),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                      child: Text(
-                                                        "${controller.listQuantity[index]["quantity"].value}",
-                                                        style: GoogleFonts.readexPro(
-                                                          fontSize: 12,
-                                                          color: Colors.black87,
-                                                          fontWeight: FontWeight.bold,
-                                                        ),
+                                            Obx(
+                                              () => Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: <Widget>[
+                                                  // InkWell(
+                                                  //   onTap: () => controller
+                                                  //       .handleUpdateCart(
+                                                  //           "${controller.carts[index].productId}",
+                                                  //           controller
+                                                  //               .listQuantity[
+                                                  //                   index]
+                                                  //                   ["quantity"]
+                                                  //               .value),
+                                                  //   child: const Icon(
+                                                  //       CupertinoIcons.pencil,
+                                                  //       color:
+                                                  //           Color(0xFF3978EF)),
+                                                  // ),
+                                                  // const Spacer(),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      final productId =
+                                                          controller
+                                                              .carts[index]
+                                                              .productId!;
+                                                      controller.handleDecrease(
+                                                        productId,
+                                                        index,
+                                                      );
+                                                    },
+                                                    child: const Icon(
+                                                        CupertinoIcons
+                                                            .minus_circle_fill,
+                                                        color:
+                                                            Color(0xFF3978EF)),
+                                                  ),
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 10),
+                                                    child: Text(
+                                                      "${controller.listQuantity[index]["quantity"].value}",
+                                                      style:
+                                                          GoogleFonts.readexPro(
+                                                        fontSize: 12,
+                                                        color: Colors.black87,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
-                                                    InkWell(
-                                                      onTap: () {
-                                                        controller.listQuantity[index]["quantity"].value += 1;
-                                                      },
-                                                      child: const Icon(
-                                                          CupertinoIcons
-                                                              .add_circled_solid,
-                                                          color: Color(
-                                                              0xFF3978EF)),
-                                                    )
-                                                  ],
-                                                )),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      final productId =
+                                                          controller
+                                                              .carts[index]
+                                                              .productId!;
+                                                      controller.handleIncrease(
+                                                        productId,
+                                                        index,
+                                                      );
+                                                    },
+                                                    child: const Icon(
+                                                      CupertinoIcons
+                                                          .add_circled_solid,
+                                                      color: Color(
+                                                        0xFF3978EF,
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -184,7 +212,9 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                               : controller.loading.value == Status.loading
                                   ? const Center(
                                       child: CircularProgressIndicator(
-                                          color: Color(0xFF3978EF)))
+                                        color: Color(0xFF3978EF),
+                                      ),
+                                    )
                                   : const SizedBox(),
                     ),
                   )),
@@ -327,7 +357,10 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                           ),
                         ),
                         Text(
-                          convertToIdr(controller.shppingCost.value + controller.orderPrice.value, 0),
+                          convertToIdr(
+                              controller.shppingCost.value +
+                                  controller.orderPrice.value,
+                              0),
                           style: GoogleFonts.readexPro(
                             fontSize: 12,
                             color: Colors.black87,
@@ -338,27 +371,29 @@ class PageFoodPay extends GetView<ControllerFoodPay> {
                     ElevatedButton(
                         onPressed: () {
                           log(controller.merchantAddress.value);
-                          // if(controller.categoryType.value == "DANA"){
-                          //   showDialog(
-                          //       context: context,
-                          //       builder: (context) => AlertDialog.adaptive(
-                          //         backgroundColor: Colors.white,
-                          //         surfaceTintColor: Colors.white,
-                          //         shape: RoundedRectangleBorder(
-                          //           borderRadius: BorderRadius.circular(12)
-                          //         ),
-                          //         content: const Image(
-                          //           image: AssetImage('assets/images/coming_soon.jpg'),
-                          //         ),
-                          //       ),
-                          //   );
-                          // }else if(controller.categoryType.value == "Pembayaran"){
-                          //   ScaffoldMessenger.of(context).showSnackBar(
-                          //     const SnackBar(content: Text("Harap pilih metode pembayaran anda"))
-                          //   );
-                          // }else{
-                          //   controller.orderFoodMart();
-                          // }
+                          if (controller.categoryType.value == "DANA") {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog.adaptive(
+                                backgroundColor: Colors.white,
+                                surfaceTintColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                content: const Image(
+                                  image: AssetImage(
+                                      'assets/images/coming_soon.jpg'),
+                                ),
+                              ),
+                            );
+                          } else if (controller.categoryType.value ==
+                              "Pembayaran") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        "Harap pilih metode pembayaran anda")));
+                          } else {
+                            controller.orderFoodMart();
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                             elevation: 5,

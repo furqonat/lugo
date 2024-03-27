@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lugo_marchant/api/local_service.dart';
+import 'package:lugo_marchant/page/verification/phone_verification.dart';
 import 'package:lugo_marchant/route/route_name.dart';
 import 'package:phone_number/phone_number.dart';
 
@@ -224,61 +225,139 @@ class VerificationController extends GetxController {
       phoneNumber.text,
       regionCode: regionInfo.code,
     );
-    final token = await _fbAuth.currentUser?.getIdToken();
-    final resp =
-        await apiService.verifyPhone(phoneNumber: phone.e164, token: token!);
-    if (resp.message == 'OK') {
-      verificationStatus.value = PhoneVerificationStatus(
-        status: true,
-        message: resp.message,
-      );
-      verificationId.value = resp.res;
-      callback(resp.res);
-      loadingPhoneVerification.value = false;
-      return;
-    } else {
-      loadingPhoneVerification.value = false;
-      verificationStatus.value = PhoneVerificationStatus(
-        status: false,
-        message: resp.message,
-      );
-      Get.snackbar("Error", resp.message);
-      return;
-    }
+    // final token = await _fbAuth.currentUser?.getIdToken();
+    _fbAuth.verifyPhoneNumber(
+      phoneNumber: phone.e164,
+      verificationCompleted: (credential) {},
+      verificationFailed: (error) {
+        loadingPhoneVerification.value = false;
+        verificationStatus.value = PhoneVerificationStatus(
+          status: false,
+          message: error.code,
+        );
+      },
+      codeSent: (verf, forceResendingToken) {
+        callback(verf);
+        verificationStatus.value = PhoneVerificationStatus(
+          status: true,
+          message: "OK",
+        );
+        verificationId.value = verf;
+        loadingPhoneVerification.value = false;
+        bottomSheet(this);
+      },
+      codeAutoRetrievalTimeout: (verificationId) {},
+      timeout: const Duration(seconds: 60),
+    );
+    // final resp =
+    //     await apiService.verifyPhone(phoneNumber: phone.e164, token: token!);
+    // if (resp.message == 'OK') {
+    //   verificationStatus.value = PhoneVerificationStatus(
+    //     status: true,
+    //     message: resp.message,
+    //   );
+    //   verificationId.value = resp.res;
+    //   callback(resp.res);
+    //   loadingPhoneVerification.value = false;
+    //   return;
+    // } else {
+    //   loadingPhoneVerification.value = false;
+    //   verificationStatus.value = PhoneVerificationStatus(
+    //     status: false,
+    //     message: resp.message,
+    //   );
+    //   Get.snackbar("Error", resp.message);
+    //   return;
+    // }
   }
 
   Future handleContinueVerification(
     String smsCode,
     String verificationId,
   ) async {
-    final token = await _fbAuth.currentUser?.getIdToken();
-    final resp = await apiService.verifyOTP(
-      token: token!,
-      otp: smsCode,
-      verificationId: verificationId,
+    const regionInfo = RegionInfo(name: "Indonesia", code: "ID", prefix: 62);
+    final phone = await PhoneNumberUtil().parse(
+      phoneNumber.text,
+      regionCode: regionInfo.code,
     );
-    if (resp.message == 'OK') {
-      if (verificationState == VerificationState.full.toString()) {
+
+    // final token = await _fbAuth.currentUser?.getIdToken();
+    final currentPhoneNumber = _fbAuth.currentUser?.phoneNumber;
+    // final resp = await apiService.verifyOTP(
+    //   token: token!,
+    //   otp: smsCode,
+    //   verificationId: verificationId,
+    // );
+    final credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+    if (currentPhoneNumber != null && currentPhoneNumber == phone.e164) {
+      _fbAuth.currentUser
+          ?.reauthenticateWithCredential(credential)
+          .then((value) {
+        if (verificationState == VerificationState.full.toString()) {
+          verificationStatus.value = PhoneVerificationStatus(
+            status: true,
+            message: "OK",
+          );
+          activeStep.value = 1;
+        } else {
+          LocalService().setIsLogin(isLogin: true);
+          LocalService().setInVerification(false);
+          LocalService().setInVerificationStep(VerificationState.phoneOnly);
+          Get.offAllNamed(Routes.bottomNav);
+        }
+      }).catchError((error) {
         verificationStatus.value = PhoneVerificationStatus(
-          status: true,
-          message: "OK",
+          status: false,
+          message: error.toString(),
         );
-        activeStep.value = 1;
-      } else {
-        LocalService().setIsLogin(isLogin: true);
-        LocalService().setInVerification(false);
-        LocalService().setInVerificationStep(VerificationState.phoneOnly);
-        Get.offAllNamed(Routes.bottomNav);
-      }
-      return;
+        Get.snackbar("Error", error.toString());
+      });
     } else {
-      verificationStatus.value = PhoneVerificationStatus(
-        status: false,
-        message: resp.message,
-      );
-      Get.snackbar("Error", resp.message);
-      return;
+      _fbAuth.currentUser?.linkWithCredential(credential).then((value) {
+        if (verificationState == VerificationState.full.toString()) {
+          verificationStatus.value = PhoneVerificationStatus(
+            status: true,
+            message: "OK",
+          );
+          activeStep.value = 1;
+        } else {
+          LocalService().setIsLogin(isLogin: true);
+          LocalService().setInVerification(false);
+          LocalService().setInVerificationStep(VerificationState.phoneOnly);
+          Get.offAllNamed(Routes.bottomNav);
+        }
+      }).onError((error, stackTrace) {
+        verificationStatus.value = PhoneVerificationStatus(
+          status: false,
+          message: error.toString(),
+        );
+        Get.snackbar("Error", error.toString());
+      });
     }
+    // if (resp.message == 'OK') {
+    //   if (verificationState == VerificationState.full.toString()) {
+    //     verificationStatus.value = PhoneVerificationStatus(
+    //       status: true,
+    //       message: "OK",
+    //     );
+    //     activeStep.value = 1;
+    //   } else {
+    //     LocalService().setIsLogin(isLogin: true);
+    //     LocalService().setInVerification(false);
+    //     LocalService().setInVerificationStep(VerificationState.phoneOnly);
+    //     Get.offAllNamed(Routes.bottomNav);
+    //   }
+    //   return;
+    // } else {
+    //   verificationStatus.value = PhoneVerificationStatus(
+    //     status: false,
+    //     message: resp.message,
+    //   );
+    //   Get.snackbar("Error", resp.message);
+    // }
   }
 
   @override

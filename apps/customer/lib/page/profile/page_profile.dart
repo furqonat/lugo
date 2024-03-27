@@ -71,36 +71,38 @@ class PageProfile extends GetView<ControllerProfile> {
                           ),
                           const Spacer(),
                           ElevatedButton(
-                              onPressed: () =>
-                                  Get.toNamed(Routes.editProfile, arguments: {
-                                    'name': controller
-                                            .controllerUser.user.value.name ??
-                                        "",
-                                    'email': controller
-                                        .controllerUser.user.value.email,
-                                    'phone': controller
-                                        .controllerUser.user.value.phone,
-                                    'avatar': controller
-                                            .controllerUser.user.value.avatar ??
-                                        "",
-                                  }),
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  fixedSize:
-                                      Size(Get.width * 0.3, Get.height * 0.04),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      side: const BorderSide(
-                                          color: Colors.white, width: 1)),
-                                  backgroundColor: Colors.transparent),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "Edit Profile",
-                                  style: GoogleFonts.readexPro(
-                                      fontSize: 12, color: Colors.white),
+                            onPressed: () =>
+                                Get.toNamed(Routes.editProfile, arguments: {
+                              'name':
+                                  controller.controllerUser.user.value.name ??
+                                      "",
+                              'email':
+                                  controller.controllerUser.user.value.email,
+                              'phone':
+                                  controller.controllerUser.user.value.phone,
+                              'avatar':
+                                  controller.controllerUser.user.value.avatar ??
+                                      "",
+                            }),
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(
+                                  color: Colors.white,
+                                  width: 1,
                                 ),
-                              ))
+                              ),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              "Edit Profile",
+                              style: GoogleFonts.readexPro(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     ),

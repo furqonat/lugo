@@ -14,97 +14,98 @@ class PageEditProfile extends GetView<ControllerEditProfile> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: PreferredSize(
-          preferredSize: Size.fromHeight(Get.height * 0.3),
-          child: AppBar(
-            automaticallyImplyLeading: false,
-            flexibleSpace: Obx(() => Stack(
-                  children: <Widget>[
-                    controller.imgPreview.value == ''
-                        ? CachedNetworkImage(
-                            width: Get.width,
-                            height: Get.height * 0.3,
-                            fit: BoxFit.cover,
-                            imageUrl: controller.photoProfile.value,
-                            errorWidget: (context, url, error) => Image(
-                                width: Get.width,
-                                height: Get.height * 0.3,
-                                fit: BoxFit.cover,
-                                image: const AssetImage(
-                                    'assets/images/person.png')),
-                          )
-                        : Image.file(
-                            width: Get.width,
-                            height: Get.height * 0.3,
-                            fit: BoxFit.cover,
-                            File(controller.imgPreview.value)),
-                    Container(
-                      width: Get.width,
-                      height: Get.height * 0.3,
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              end: Alignment.bottomCenter,
-                              begin: Alignment.topCenter,
-                              colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7)
-                          ])),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          ElevatedButton(
-                              onPressed: () => showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog.adaptive(
-                                      content: Text(
-                                        'Anda ingin mengambil gambar dari mana?',
-                                        style: GoogleFonts.readexPro(),
-                                      ),
-                                      actions: [
-                                        OutlinedButton(
-                                            onPressed: () {
-                                              controller.getFromFile();
-                                              Get.back();
-                                            },
-                                            child: Text(
-                                              'Gallery',
-                                              style: GoogleFonts.readexPro(),
-                                            )),
-                                        OutlinedButton(
-                                            onPressed: () {
-                                              controller.getFromCamera();
-                                              Get.back();
-                                            },
-                                            child: Text(
-                                              'Camera',
-                                              style: GoogleFonts.readexPro(),
-                                            )),
-                                      ],
-                                    ),
-                                  ),
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  fixedSize:
-                                      Size(Get.width * 0.3, Get.height * 0.04),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      side: const BorderSide(
-                                          color: Colors.white, width: 1)),
-                                  backgroundColor: Colors.transparent),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "Edit Photo",
-                                  style: GoogleFonts.readexPro(
-                                      fontSize: 12, color: Colors.white),
-                                ),
-                              ))
-                        ],
-                      ),
+        preferredSize: Size.fromHeight(Get.height * 0.3),
+        child: AppBar(
+          automaticallyImplyLeading: false,
+          flexibleSpace: Obx(() => Stack(
+                children: <Widget>[
+                  controller.imgPreview.value == ''
+                      ? CachedNetworkImage(
+                          width: Get.width,
+                          height: Get.height * 0.3,
+                          fit: BoxFit.cover,
+                          imageUrl: controller.photoProfile.value,
+                          errorWidget: (context, url, error) => Image(
+                              width: Get.width,
+                              height: Get.height * 0.3,
+                              fit: BoxFit.cover,
+                              image:
+                                  const AssetImage('assets/images/person.png')),
+                        )
+                      : Image.file(
+                          width: Get.width,
+                          height: Get.height * 0.3,
+                          fit: BoxFit.cover,
+                          File(controller.imgPreview.value)),
+                  Container(
+                    width: Get.width,
+                    height: Get.height * 0.3,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            end: Alignment.bottomCenter,
+                            begin: Alignment.topCenter,
+                            colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7)
+                        ])),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        ElevatedButton(
+                          onPressed: () => showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog.adaptive(
+                              content: Text(
+                                'Anda ingin mengambil gambar dari mana?',
+                                style: GoogleFonts.readexPro(),
+                              ),
+                              actions: [
+                                OutlinedButton(
+                                    onPressed: () {
+                                      controller.getFromFile();
+                                      Get.back();
+                                    },
+                                    child: Text(
+                                      'Gallery',
+                                      style: GoogleFonts.readexPro(),
+                                    )),
+                                OutlinedButton(
+                                    onPressed: () {
+                                      controller.getFromCamera();
+                                      Get.back();
+                                    },
+                                    child: Text(
+                                      'Camera',
+                                      style: GoogleFonts.readexPro(),
+                                    )),
+                              ],
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                color: Colors.white,
+                                width: 1,
+                              ),
+                            ),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          child: Text(
+                            "Edit Photo",
+                            style: GoogleFonts.readexPro(
+                                fontSize: 12, color: Colors.white),
+                          ),
+                        )
+                      ],
                     ),
-                  ],
-                )),
-          )),
+                  ),
+                ],
+              )),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Form(

@@ -8,6 +8,7 @@ import 'package:lugo_customer/response/banner.dart';
 import 'package:lugo_customer/response/merchant.dart';
 
 enum Status { idle, loading, success, failed }
+
 class ControllerFood extends GetxController {
   final ApiFood api;
   ControllerFood({required this.api});
@@ -64,13 +65,14 @@ class ControllerFood extends GetxController {
     }
   }
 
-  searchShop(){
-    if(merchant.isNotEmpty && edtSearch.text.isNotEmpty){
-      for(var i in merchant){
-        var status = edtSearch.text.toLowerCase() == i.details?.name?.toLowerCase();
-        if (status == true){
+  searchShop() {
+    if (merchant.isNotEmpty && edtSearch.text.isNotEmpty) {
+      for (var i in merchant) {
+        var status =
+            edtSearch.text.toLowerCase() == i.details?.name?.toLowerCase();
+        if (status == true) {
           searchMerchant.add(i);
-        }else{
+        } else {
           log('gagal');
         }
       }
@@ -84,20 +86,22 @@ class ControllerFood extends GetxController {
     super.onInit();
   }
 
-  getBanner()async{
-    try{
+  getBanner() async {
+    try {
       bannerLoader(true);
       var token = await firebase.currentUser?.getIdToken();
       var r = await api.getBanner(token: token!);
-      if(r != null){
+      log("helo $r");
+      if (r != null) {
         var list = r;
-        banner(RxList<Banners>.from(list?.map((e) => Banners.fromJson(e)) ?? []));
+        banner(
+            RxList<Banners>.from(list?.map((e) => Banners.fromJson(e)) ?? []));
         bannerLoader(false);
-      }else{
+      } else {
         Fluttertoast.showToast(msg: "Ada yang salah");
         bannerLoader(false);
       }
-    }catch(e, stackTrace){
+    } catch (e, stackTrace) {
       log('$e');
       log('$stackTrace');
       bannerLoader(false);

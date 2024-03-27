@@ -87,43 +87,48 @@ class PageFood extends GetView<ControllerFood> {
                   ),
                 ),
               ),
-              Obx(() => controller.bannerLoader.value == false
-                  ? CarouselSlider.builder(
-                      itemCount: controller.banner.first.images!.length,
-                      options: CarouselOptions(
+              Obx(
+                () => !controller.bannerLoader.value &&
+                        controller.banner.first.images != null
+                    ? CarouselSlider.builder(
+                        itemCount: controller.banner.first.images?.length,
+                        options: CarouselOptions(
                           viewportFraction: 1,
                           autoPlay: true,
                           aspectRatio: 2,
-                          initialPage: 0),
-                      itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: CachedNetworkImage(
-                                width: Get.width,
-                                fit: BoxFit.fill,
-                                height: Get.height * 0.3,
-                                imageUrl: controller
-                                        .banner.first.images![index].link ??
-                                    '',
-                                errorWidget: (context, url, error) => Image(
-                                    fit: BoxFit.fill,
-                                    width: Get.width,
-                                    image:
-                                        AssetImage(controller.listImg.first))),
-                          ),
-                        );
-                      },
-                    )
-                  : SizedBox(
-                      height: Get.height * 0.2,
-                      width: Get.width,
-                      child: Shimmer.fromColors(
+                          initialPage: 0,
+                        ),
+                        itemBuilder: (context, index, realIndex) {
+                          return Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                  width: Get.width,
+                                  fit: BoxFit.fill,
+                                  height: Get.height * 0.3,
+                                  imageUrl: controller
+                                          .banner.first.images![index].link ??
+                                      '',
+                                  errorWidget: (context, url, error) => Image(
+                                      fit: BoxFit.fill,
+                                      width: Get.width,
+                                      image: AssetImage(
+                                          controller.listImg.first))),
+                            ),
+                          );
+                        },
+                      )
+                    : SizedBox(
+                        height: Get.height * 0.2,
+                        width: Get.width,
+                        child: Shimmer.fromColors(
                           baseColor: Colors.grey.shade300,
                           highlightColor: Colors.white,
-                          child: const Card(elevation: 0)),
-                    )),
+                          child: const Card(elevation: 0),
+                        ),
+                      ),
+              ),
               // Container(
               //   margin: const EdgeInsets.only(top: 10, bottom: 10),
               //   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -219,10 +224,6 @@ class PageFood extends GetView<ControllerFood> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Nama toko',
-                                      style: GoogleFonts.poppins(fontSize: 12),
-                                    ),
                                     Text(
                                       controller.merchant[index].details!.name!,
                                       style: GoogleFonts.readexPro(

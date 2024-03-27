@@ -87,7 +87,8 @@ class PageMart extends GetView<ControllerMart> {
                   ),
                 ),
               ),
-              Obx(() => controller.bannerLoader.value == false
+              Obx(() => controller.bannerLoader.value == false &&
+                      controller.banner.first.images != null
                   ? CarouselSlider.builder(
                       itemCount: controller.banner.first.images!.length,
                       options: CarouselOptions(

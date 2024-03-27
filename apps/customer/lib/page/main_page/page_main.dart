@@ -38,65 +38,69 @@ class PageMain extends GetView<ControllerMain> {
         child: Column(
           children: <Widget>[
             Obx(() {
-              if(controller.loading.value == false){
+              if (controller.loading.value == false) {
                 return controller.banner.first.images != null
                     ? SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: CarouselSlider.builder(
-                      itemCount: controller.banner.first.images!.length,
-                      options: CarouselOptions(
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          aspectRatio: 2,
-                          initialPage: 0),
-                      itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: CachedNetworkImage(
-                                width: Get.width,
-                                fit: BoxFit.fill,
-                                height: Get.height * 0.3,
-                                imageUrl: controller.banner.first.images![index].link ?? '',
-                                errorWidget: (context, url, error) =>
-                                    Image(
-                                        fit: BoxFit.fill,
-                                        width: Get.width,
-                                        image: AssetImage(controller.listImg.first))),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: CarouselSlider.builder(
+                            itemCount: controller.banner.first.images!.length,
+                            options: CarouselOptions(
+                                viewportFraction: 1,
+                                autoPlay: true,
+                                aspectRatio: 2,
+                                initialPage: 0),
+                            itemBuilder: (context, index, realIndex) {
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CachedNetworkImage(
+                                      width: Get.width,
+                                      fit: BoxFit.fill,
+                                      height: Get.height * 0.3,
+                                      imageUrl: controller.banner.first
+                                              .images![index].link ??
+                                          '',
+                                      errorWidget: (context, url, error) =>
+                                          Image(
+                                              fit: BoxFit.fill,
+                                              width: Get.width,
+                                              image: AssetImage(
+                                                  controller.listImg.first))),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                )
+                        ),
+                      )
                     : SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: CarouselSlider.builder(
-                      itemCount: controller.listImg.length,
-                      options: CarouselOptions(
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          aspectRatio: 2,
-                          initialPage: 0),
-                      itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image(
-                                fit: BoxFit.fill,
-                                width: Get.width,
-                                image: AssetImage(controller.listImg.first)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: CarouselSlider.builder(
+                            itemCount: controller.listImg.length,
+                            options: CarouselOptions(
+                                viewportFraction: 1,
+                                autoPlay: true,
+                                aspectRatio: 2,
+                                initialPage: 0),
+                            itemBuilder: (context, index, realIndex) {
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image(
+                                      fit: BoxFit.fill,
+                                      width: Get.width,
+                                      image:
+                                          AssetImage(controller.listImg.first)),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              }else{
+                        ),
+                      );
+              } else {
                 return SizedBox(
                   height: Get.height * 0.2,
                   width: Get.width,
@@ -343,55 +347,57 @@ class PageMain extends GetView<ControllerMain> {
               ),
             ),
             Obx(() {
-              if(controller.loading.value == false){
-                return controller.banner.first.images != null
+              if (controller.loading.value == false) {
+                return controller.banner.first.images?.length != null
                     ? CarouselSlider.builder(
-                      itemCount: controller.banner.first.images!.length,
-                      options: CarouselOptions(
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          aspectRatio: 2,
-                          initialPage: 0),
-                      itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: CachedNetworkImage(
-                                width: Get.width,
-                                fit: BoxFit.fill,
-                                height: Get.height * 0.3,
-                                imageUrl: controller.banner.first.images![index].link ?? '',
-                                errorWidget: (context, url, error) =>
-                                    Image(
-                                        fit: BoxFit.fill,
-                                        width: Get.width,
-                                        image: AssetImage(controller.listImg.first))),
-                          ),
-                        );
-                      },
-                    )
+                        itemCount: controller.banner.first.images!.length,
+                        options: CarouselOptions(
+                            viewportFraction: 1,
+                            autoPlay: true,
+                            aspectRatio: 2,
+                            initialPage: 0),
+                        itemBuilder: (context, index, realIndex) {
+                          return Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                  width: Get.width,
+                                  fit: BoxFit.fill,
+                                  height: Get.height * 0.3,
+                                  imageUrl: controller
+                                          .banner.first.images![index].link ??
+                                      '',
+                                  errorWidget: (context, url, error) => Image(
+                                      fit: BoxFit.fill,
+                                      width: Get.width,
+                                      image: AssetImage(
+                                          controller.listImg.first))),
+                            ),
+                          );
+                        },
+                      )
                     : CarouselSlider.builder(
-                      itemCount: controller.listImg.length,
-                      options: CarouselOptions(
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          aspectRatio: 2,
-                          initialPage: 0),
-                      itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image(
-                                fit: BoxFit.fill,
-                                width: Get.width,
-                                image: AssetImage(controller.listImg.first)),
-                          ),
-                        );
-                      },
-                    );
-              }else{
+                        itemCount: controller.listImg.length,
+                        options: CarouselOptions(
+                            viewportFraction: 1,
+                            autoPlay: true,
+                            aspectRatio: 2,
+                            initialPage: 0),
+                        itemBuilder: (context, index, realIndex) {
+                          return Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image(
+                                  fit: BoxFit.fill,
+                                  width: Get.width,
+                                  image: AssetImage(controller.listImg.first)),
+                            ),
+                          );
+                        },
+                      );
+              } else {
                 return SizedBox(
                   height: Get.height * 0.2,
                   width: Get.width,

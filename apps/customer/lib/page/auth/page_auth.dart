@@ -21,7 +21,7 @@ class PageAuth extends GetView<ControllerAuth> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
-                    'Selamat datang',
+                    'Selamat Datang',
                     style: GoogleFonts.readexPro(
                       fontSize: 30.0,
                       color: const Color(0xFF3978EF),

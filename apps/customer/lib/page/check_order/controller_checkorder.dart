@@ -76,8 +76,9 @@ class ControllerCheckOrder extends GetxController {
         markerId: const MarkerId("Saya"),
         position:
             LatLng(myLocation.value.latitude!, myLocation.value.longitude!)));
-
-    findDriver();
+    if (requestType.value != 'FOOD' || requestType.value != 'MART') {
+      findDriver();
+    }
 
     super.onInit();
   }

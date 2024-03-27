@@ -32,6 +32,8 @@ class PageOtp extends GetView<ControllerOtp> {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
@@ -49,9 +51,11 @@ class PageOtp extends GetView<ControllerOtp> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               child: Input(
+                enabled: controller.editablePhoneNumber.value,
                 controller: controller.edtPhone,
                 keyboardType: TextInputType.phone,
                 hintText: 'Nomor Telepon',
+                labelText: 'Nomor Telepon',
                 validator: Validatorless.multiple([
                   Validatorless.required('Ponsel tidak boleh kosong'),
                   Validatorless.min(10, 'Ponsel tidak boleh kurang dari 10'),
@@ -69,18 +73,7 @@ class PageOtp extends GetView<ControllerOtp> {
                         controller.formkeyPhone.currentState!.validate();
                     final isLoading = controller.loadingPhoneVerification.value;
                     if (okForm && !isLoading) {
-                      controller.handleVerifyPhoneNumber().then((value) {
-                        if (value != null) {
-                          controller.loadingPhoneVerification.value = false;
-                          controller.bottomSheetOtp(value);
-                        } else {
-                          controller.loadingPhoneVerification.value = false;
-                          Get.snackbar(
-                            "Error",
-                            "Ada kesalahan, silahkan coba lagi",
-                          );
-                        }
-                      });
+                      controller.handleVerifyPhoneNumber();
                     }
                   },
                   child: controller.loadingPhoneVerification.value

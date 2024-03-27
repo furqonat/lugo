@@ -24,41 +24,43 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         leading: InkWell(
-            onTap: () => Get.back(),
-            child: SizedBox(
-              width: 55,
-              height: 55,
-              child: Card(
-                elevation: 0,
-                color: const Color(0xFF3978EF),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100)),
-                child: const Center(
-                  child:
-                      Icon(Icons.chevron_left, size: 24, color: Colors.white),
-                ),
+          onTap: () => Get.back(),
+          child: SizedBox(
+            width: 55,
+            height: 55,
+            child: Card(
+              elevation: 0,
+              color: const Color(0xFF3978EF),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100)),
+              child: const Center(
+                child: Icon(Icons.chevron_left, size: 24, color: Colors.white),
               ),
-            )),
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Obx(() => controller.bannerLoader.value == false
-                ? CarouselSlider.builder(
-                    itemCount: controller.banner.first.images!.length,
-                    options: CarouselOptions(
-                        viewportFraction: 1,
-                        autoPlay: true,
-                        aspectRatio: 2,
-                        initialPage: 0),
-                    itemBuilder: (context, index, realIndex) {
-                      return Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: CachedNetworkImage(
+            Obx(
+              () => controller.bannerLoader.value == false &&
+                      controller.banner.first.images?.length != null
+                  ? CarouselSlider.builder(
+                      itemCount: controller.banner.first.images?.length,
+                      options: CarouselOptions(
+                          viewportFraction: 1,
+                          autoPlay: true,
+                          aspectRatio: 2,
+                          initialPage: 0),
+                      itemBuilder: (context, index, realIndex) {
+                        return Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: CachedNetworkImage(
                               width: Get.width,
                               fit: BoxFit.fill,
                               height: Get.height * 0.3,
@@ -66,20 +68,27 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                                   controller.banner.first.images![index].link ??
                                       '',
                               errorWidget: (context, url, error) => Image(
-                                  fit: BoxFit.fill,
-                                  width: Get.width,
-                                  image: AssetImage(controller.listImg.first))),
-                        ),
-                      );
-                    },
-                  )
-                : SizedBox(
-                    height: Get.height * 0.2,
-                    width: Get.width,
-                    child: Shimmer.fromColors(
+                                fit: BoxFit.fill,
+                                width: Get.width,
+                                image: AssetImage(
+                                  controller.listImg.first,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : SizedBox(
+                      height: Get.height * 0.2,
+                      width: Get.width,
+                      child: Shimmer.fromColors(
                         baseColor: Colors.grey.shade300,
                         highlightColor: Colors.white,
-                        child: const Card(elevation: 0)))),
+                        child: const Card(elevation: 0),
+                      ),
+                    ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text(
@@ -131,12 +140,13 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                         padding: const EdgeInsets.fromLTRB(0, 5, 5, 5),
                         child: InkWell(
                           onTap: () => controller.detailProduct(
-                              context,
-                              "${controller.product[index].image}",
-                              "${controller.product[index].name}",
-                              controller.product[index].price ?? 0,
-                              "${controller.product[index].description}",
-                              controller.favoriteStatus[index]["status"].value),
+                            "${controller.product[index].image}",
+                            "${controller.product[index].name}",
+                            controller.product[index].price ?? 0,
+                            "${controller.product[index].description}",
+                            "${controller.product[index].id}",
+                            index,
+                          ),
                           child: Row(
                             children: <Widget>[
                               Padding(
@@ -151,11 +161,12 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                                         '${controller.product[index].image}',
                                     errorWidget: (context, url, error) =>
                                         const Image(
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                            image: AssetImage(
-                                                'assets/images/sample_food.png')),
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                      image: AssetImage(
+                                          'assets/images/sample_food.png'),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -196,104 +207,52 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                                 height: 70,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Obx(() => Row(
-                                          children: <Widget>[
-                                            InkWell(
-                                              onTap: () => controller
-                                                  .postLikeProductMethod(
-                                                      controller
-                                                          .product[index].id!,
-                                                      index),
-                                              child: Icon(
-                                                size: 24,
-                                                color: controller
-                                                        .favoriteStatus[index]
-                                                            ["status"]
-                                                        .value
-                                                    ? Colors.pink
-                                                        .withOpacity(0.7)
-                                                    : const Color(0xFF3978EF),
-                                                Icons.favorite,
+                                    Obx(
+                                      () => Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          InkWell(
+                                            onTap: () {
+                                              controller
+                                                  .handleDecreaseCart(index);
+                                            },
+                                            child: const Icon(
+                                              CupertinoIcons.minus_circle_fill,
+                                              color: Color(0xFF3978EF),
+                                              size: 32,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10),
+                                            child: Text(
+                                              "${controller.listQuantity[index]["quantity"].value}",
+                                              style: GoogleFonts.readexPro(
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            InkWell(
-                                              onTap: () => controller.cartMethod(
-                                                  "${controller.product[index].id}",
-                                                  controller
-                                                      .listQuantity[index]
-                                                          ['quantity']
-                                                      .value,
-                                                  controller
-                                                      .product[index].price!),
-                                              child: const Icon(
-                                                size: 24,
-                                                Icons.shopping_bag_rounded,
-                                                color: Color(0xFF3978EF),
-                                              ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              controller
+                                                  .handleIncreaseCart(index);
+                                            },
+                                            child: const Icon(
+                                              CupertinoIcons.add_circled_solid,
+                                              color: Color(0xFF3978EF),
+                                              size: 32,
                                             ),
-                                          ],
-                                        )),
-                                    Obx(() => Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            InkWell(
-                                              onTap: () {
-                                                controller
-                                                            .listQuantity[index]
-                                                                ["quantity"]
-                                                            .value ==
-                                                        0
-                                                    ? controller
-                                                        .listQuantity[index]
-                                                            ["quantity"]
-                                                        .value = 0
-                                                    : controller
-                                                        .listQuantity[index]
-                                                            ["quantity"]
-                                                        .value = controller
-                                                            .listQuantity[index]
-                                                                ["quantity"]
-                                                            .value -
-                                                        1;
-                                              },
-                                              child: const Icon(
-                                                  CupertinoIcons
-                                                      .minus_circle_fill,
-                                                  color: Color(0xFF3978EF)),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10),
-                                              child: Text(
-                                                "${controller.listQuantity[index]["quantity"].value}",
-                                                style: GoogleFonts.readexPro(
-                                                  fontSize: 12,
-                                                  color: Colors.black87,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: () {
-                                                controller
-                                                    .listQuantity[index]
-                                                        ["quantity"]
-                                                    .value += 1;
-                                              },
-                                              child: const Icon(
-                                                  CupertinoIcons
-                                                      .add_circled_solid,
-                                                  color: Color(0xFF3978EF)),
-                                            )
-                                          ],
-                                        )),
+                                          )
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               )
@@ -315,7 +274,14 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                 }
               }),
             ),
-            Obx(() => Container(
+            Obx(
+              () => InkWell(
+                onTap: () {
+                  Get.toNamed(Routes.foodPay, arguments: {
+                    "merchantAddress": controller.merchantAddress.value
+                  });
+                },
+                child: Container(
                   width: Get.width,
                   height: Get.height * 0.07,
                   margin: const EdgeInsets.only(top: 10),
@@ -336,24 +302,15 @@ class PageFoodMenu extends GetView<ControllerFoodMenu> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      InkWell(
-                        onTap: () {
-                          Get.toNamed(Routes.foodPay, arguments: {
-                            "merchantAddress": controller.merchantAddress.value
-                          });
-                        },
-                        child: Text(
-                          "Order",
-                          style: GoogleFonts.readexPro(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      const Icon(
+                        Icons.arrow_right,
+                        color: Colors.white,
                       ),
                     ],
                   ),
-                ))
+                ),
+              ),
+            )
           ],
         ),
       ),
