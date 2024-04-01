@@ -64,7 +64,7 @@ export class CustomerController {
     @Request() req?: { uid?: string },
   ) {
     if (req?.uid) {
-      return this.customerService.obtainVerificationCode(phone)
+      return this.customerService.obtainVerificationCode(phone, req.uid)
     }
     throw new UnauthorizedException()
   }

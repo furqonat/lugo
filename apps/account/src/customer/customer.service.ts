@@ -105,7 +105,7 @@ export class CustomerService {
     }
   }
 
-  async obtainVerificationCode(phone: string) {
+  async obtainVerificationCode(phone: string, uid: string) {
     const code = otpGenerator()
     const verifcationId = await this.prismaService.verification.create({
       data: {
@@ -115,7 +115,7 @@ export class CustomerService {
     })
     const data = await this.prismaService.customer.findFirst({
       where: {
-        phone: phone
+        id: uid
       }
     })
 
