@@ -114,7 +114,7 @@ export class DriverController {
     @Request() req?: { uid?: string },
   ) {
     if (req?.uid) {
-      return this.driverService.obtainVerificationCode(phone)
+      return this.driverService.obtainVerificationCode(phone, req.uid)
     }
     throw new UnauthorizedException()
   }

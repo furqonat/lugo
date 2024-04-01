@@ -68,7 +68,7 @@ export class MerchantController {
     @Request() req?: { uid?: string },
   ) {
     if (req?.uid) {
-      return this.merchantService.obtainVerificationCode(phone)
+      return this.merchantService.obtainVerificationCode(phone, req.uid)
     }
     throw new UnauthorizedException()
   }

@@ -8,6 +8,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
+import { readFileSync } from 'fs'
+import { sendEmail } from 'libs/common/src/lib/custom'
 
 @Injectable()
 export class MerchantService {
@@ -168,7 +170,7 @@ export class MerchantService {
     }
   }
 
-  async obtainVerificationCode(phone: string) {
+  async obtainVerificationCode(phone: string, uid: string) {
     const code = otpGenerator()
     const verifcationId = await this.prismaService.verification.create({
       data: {
@@ -176,23 +178,53 @@ export class MerchantService {
         code: code,
       },
     })
-    const resp = await sendSms(phone, `{code}`)
-    if (resp == HttpStatus.CREATED) {
+
+    const data = await this.prismaService.merchant.findFirst({
+      where: {
+        id: uid
+      }
+    })
+
+    if(data){
+      let htmlstream = await readFileSync("./libs/common/src/html/otp_verification.html");
+      let html :any = htmlstream.toString();
+      html = html.replaceAll("{{ otp }}", code)
+            .replaceAll("{{ username }}", data.name)
+            .replaceAll("{{ date }}", new Date().toLocaleDateString("id-ID"))
+
+      const response = await sendEmail(data.email,
+        "Email One Time Password",
+        "Email One Time Password for " + data.name,
+        html
+      );
+
       return {
         message: 'OK',
         res: verifcationId.id,
       }
-    } else {
-      await this.prismaService.verification.delete({
-        where: {
-          id: verifcationId.id,
-        },
-      })
-      throw new InternalServerErrorException({
-        message: 'Internal Server Error',
-        error: resp,
-      })
     }
+    return {
+      message: "Data tidak ditemukan",
+      res: data
+    }
+
+    // const resp = await sendSms(phone, `{code}`)
+    // if (resp == HttpStatus.CREATED) {
+    //   return {
+    //     message: 'OK',
+    //     res: verifcationId.id,
+    //   }
+    // } else {
+    //   await this.prismaService.verification.delete({
+    //     where: {
+    //       id: verifcationId.id,
+    //     },
+    //   })
+    //   throw new InternalServerErrorException({
+    //     message: 'Internal Server Error',
+    //     error: resp,
+    //   })
+    // }
   }
 
   async phoneVerification(

@@ -137,6 +137,10 @@ export class CustomerService {
         res: verifcationId.id,
       }
     }
+    return {
+      message: "Data tidak ditemukan",
+      res: data
+    }
     // const resp = await sendSms(phone, `${code}`)
     // if (resp == HttpStatus.CREATED) {
     //   return {
