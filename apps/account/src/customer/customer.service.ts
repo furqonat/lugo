@@ -8,7 +8,9 @@ import {
 import { Prisma, PrismaService } from '@lugo/prisma'
 import { FirebaseService } from '@lugo/firebase'
 import { CustomerBasicUpdate } from '../dto/customer.dto'
-import { otpGenerator, sendSms } from '@lugo/common'
+import { otpGenerator } from '@lugo/common'
+import { readFileSync } from 'fs'
+import { sendEmail } from 'libs/common/src/lib/custom'
 
 @Injectable()
 export class CustomerService {
@@ -111,24 +113,47 @@ export class CustomerService {
         code: code,
       },
     })
-    console.log(code)
-    const resp = await sendSms(phone, `${code}`)
-    if (resp == HttpStatus.CREATED) {
+    const data = await this.prismaService.customer.findFirst({
+      where: {
+        phone: phone
+      }
+    })
+
+    if(data){
+      let htmlstream = await readFileSync("./libs/common/src/html/otp_verification.html");
+      let html :any = htmlstream.toString();
+      html = html.replaceAll("{{ otp }}", code)
+            .replaceAll("{{ username }}", data.name)
+            .replaceAll("{{ date }}", new Date().toLocaleDateString("id-ID"))
+
+      const response = await sendEmail(data.email,
+        "Email One Time Password",
+        "Email One Time Password for " + data.name,
+        html
+      );
+
       return {
         message: 'OK',
         res: verifcationId.id,
       }
-    } else {
-      await this.prismaService.verification.delete({
-        where: {
-          id: verifcationId.id,
-        },
-      })
-      throw new InternalServerErrorException({
-        message: 'Internal Server Error',
-        error: resp,
-      })
     }
+    // const resp = await sendSms(phone, `${code}`)
+    // if (resp == HttpStatus.CREATED) {
+    //   return {
+    //     message: 'OK',
+    //     res: verifcationId.id,
+    //   }
+    // } else {
+    //   await this.prismaService.verification.delete({
+    //     where: {
+    //       id: verifcationId.id,
+    //     },
+    //   })
+    //   throw new InternalServerErrorException({
+    //     message: 'Internal Server Error',
+    //     error: resp,
+    //   })
+    // }
   }
 
   async phoneVerification(
