@@ -16,7 +16,7 @@ import { sendEmail } from 'libs/common/src/lib/custom'
 export class DriverService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly firebase: FirebaseService,
+    private readonly firebase: FirebaseService
   ) {}
 
   async getDriver(driverId: string, select?: Prisma.driverSelect) {
@@ -40,7 +40,7 @@ export class DriverService {
       referal: string
       name: string
       phone: string
-    },
+    }
   ) {
     const { details, referal, name, phone } = options
     try {
@@ -119,7 +119,7 @@ export class DriverService {
   async updateDriverSettings(
     driverId: string,
     autoBid?: boolean,
-    isOnline?: boolean,
+    isOnline?: boolean
   ) {
     try {
       const driver = await this.prismaService.driver.update({
@@ -157,7 +157,7 @@ export class DriverService {
 
   async updateOrderSetting(
     driverId: string,
-    data: Prisma.driver_settingsUpdateInput,
+    data: Prisma.driver_settingsUpdateInput
   ) {
     try {
       const driver = await this.prismaService.driver_settings.update({
@@ -211,7 +211,7 @@ export class DriverService {
   async updateCurrentLatLon(
     driverId: string,
     latitude: number,
-    longitude: number,
+    longitude: number
   ) {
     try {
       const driver = await this.prismaService.driver.update({
@@ -259,34 +259,44 @@ export class DriverService {
 
     const data = await this.prismaService.driver.findFirst({
       where: {
-        id: uid
-      }
+        id: uid,
+      },
     })
 
-    if(data){
-      let htmlstream = await readFileSync("./libs/common/src/html/otp_verification.html");
-      let html :any = htmlstream.toString();
-      html = html.replaceAll("{{ otp }}", code)
-            .replaceAll("{{ username }}", data.name)
-            .replaceAll("{{ date }}", new Date().toLocaleDateString("id-ID"))
+    if (data) {
+      let htmlstream = await readFileSync(
+        './libs/common/src/html/otp_verification.html'
+      )
+      let html: any = htmlstream.toString()
+      html = html
+        .replaceAll('{{ otp }}', code)
+        .replaceAll('{{ username }}', data.name)
+        .replaceAll('{{ date }}', new Date().toLocaleDateString('id-ID'))
 
-      const response = await sendEmail(data.email,
-        "Email One Time Password",
-        "Email One Time Password for " + data.name,
+      const response = await sendEmail(
+        data.email,
+        'Email One Time Password',
+        'Email One Time Password for ' + data.name,
         html
-      );
+      )
 
       return {
         message: 'OK',
         res: {
-          data:data,
-          verifcationId: verifcationId.id
+          data: data,
+          verifcationId: verifcationId.id,
         },
       }
     }
+
+    await this.prismaService.verification.delete({
+      where: {
+        id: verifcationId.id,
+      },
+    })
     return {
-      message: "Data tidak ditemukan",
-      res: data
+      message: 'Data tidak ditemukan',
+      res: data,
     }
 
     // const resp = await sendSms(phone, `${code}`)
@@ -311,7 +321,7 @@ export class DriverService {
   async phoneVerification(
     driverId: string,
     verifcationId: string,
-    smsCode: number,
+    smsCode: number
   ) {
     const verification = await this.prismaService.verification.findUnique({
       where: {

@@ -40,7 +40,7 @@ export class MerchantService {
           where: {
             merchant_id: merchantId,
           },
-        },
+        }
       )
       if (alreadyApply) {
         throw new BadRequestException({ message: 'merchant already apply' })
@@ -64,7 +64,7 @@ export class MerchantService {
 
   async createOrUpdateOperationTime(
     merchantId: string,
-    data: Prisma.merchant_operation_timeUpdateManyWithoutMerchant_detailsNestedInput,
+    data: Prisma.merchant_operation_timeUpdateManyWithoutMerchant_detailsNestedInput
   ) {
     try {
       const merchant = await this.prismaService.merchant.findUnique({
@@ -102,7 +102,7 @@ export class MerchantService {
 
   async updateOperationTime(
     opId: string,
-    data: Prisma.merchant_operation_timeUpdateInput,
+    data: Prisma.merchant_operation_timeUpdateInput
   ) {
     const res = await this.prismaService.merchant_operation_time.update({
       where: {
@@ -137,7 +137,7 @@ export class MerchantService {
           data: {
             token: token,
           },
-        },
+        }
       )
       return {
         message: 'OK',
@@ -181,31 +181,40 @@ export class MerchantService {
 
     const data = await this.prismaService.merchant.findFirst({
       where: {
-        id: uid
-      }
+        id: uid,
+      },
     })
 
-    if(data){
-      let htmlstream = await readFileSync("./libs/common/src/html/otp_verification.html");
-      let html :any = htmlstream.toString();
-      html = html.replaceAll("{{ otp }}", code)
-            .replaceAll("{{ username }}", data.name)
-            .replaceAll("{{ date }}", new Date().toLocaleDateString("id-ID"))
+    if (data) {
+      let htmlstream = await readFileSync(
+        './libs/common/src/html/otp_verification.html'
+      )
+      let html: any = htmlstream.toString()
+      html = html
+        .replaceAll('{{ otp }}', code)
+        .replaceAll('{{ username }}', data.name)
+        .replaceAll('{{ date }}', new Date().toLocaleDateString('id-ID'))
 
-      const response = await sendEmail(data.email,
-        "Email One Time Password",
-        "Email One Time Password for " + data.name,
+      const response = await sendEmail(
+        data.email,
+        'Email One Time Password',
+        'Email One Time Password for ' + data.name,
         html
-      );
+      )
 
       return {
         message: 'OK',
         res: verifcationId.id,
       }
     }
+    await this.prismaService.verification.delete({
+      where: {
+        id: verifcationId.id,
+      },
+    })
     return {
-      message: "Data tidak ditemukan",
-      res: data
+      message: 'Data tidak ditemukan',
+      res: data,
     }
 
     // const resp = await sendSms(phone, `{code}`)
@@ -230,7 +239,7 @@ export class MerchantService {
   async phoneVerification(
     merchantId: string,
     verifcationId: string,
-    smsCode: number,
+    smsCode: number
   ) {
     const verification = await this.prismaService.verification.findUnique({
       where: {
