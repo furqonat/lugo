@@ -278,7 +278,10 @@ export class DriverService {
 
       return {
         message: 'OK',
-        res: verifcationId.id,
+        res: {
+          data:data,
+          verifcationId: verifcationId.id
+        },
       }
     }
     return {
